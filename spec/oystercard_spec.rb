@@ -63,7 +63,7 @@ describe Oystercard do
     end
 
     it "should remember entry station after touch in" do
-      expect(oystercard.journey[:entry]).to eq 'Barking'
+      expect(oystercard.entry_station).to eq 'Barking'
     end
 
     it 'should say if oystercard is in_journey?' do
@@ -71,7 +71,7 @@ describe Oystercard do
     end
 
     it 'should allow user to touch in' do
-      expect(oystercard.journey[:entry]).to eq(entry_station.name)
+      expect(oystercard.entry_station).to eq(entry_station.name)
     end
 
   end
@@ -84,11 +84,11 @@ describe Oystercard do
     end
 
     it "should forget entry station after touch out" do
-      expect(oystercard.journey[:entry]).to be nil
+      expect(oystercard.entry_station).to be nil
     end
 
     it "Should add the completed journey after touch out" do
-      expect(oystercard.journeys).to include( {entry: entry_station.name, exit: exit_station.name} )
+      expect(oystercard.journeys).to eq [{entry: entry_station.name, exit: exit_station.name} ]
     end
 
     it 'should say if oystercard is not in_journey?' do
