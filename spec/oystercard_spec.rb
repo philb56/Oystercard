@@ -37,6 +37,7 @@ describe Oystercard do
     end
 
     it 'should allow user to touch in' do
+      oystercard.top_up(1)
       oystercard.touch_in
       expect(oystercard.in_use).to eq(true)
     end
@@ -47,14 +48,19 @@ describe Oystercard do
     end
 
     it 'should say if oystercard is in_use' do
+      oystercard.top_up(1)
       oystercard.touch_in
       expect(oystercard).to be_in_journey
     end
 
     it 'should say if oystercard is not in_use' do
+      oystercard.top_up(1)
       oystercard.touch_in
       oystercard.touch_out
       expect(oystercard).not_to be_in_journey
+    end
+    it 'should raise an eror if a card has less than the minimum balance' do
+      expect{oystercard.touch_in}.to raise_error "Insufficient funds"
     end
   end
 end
