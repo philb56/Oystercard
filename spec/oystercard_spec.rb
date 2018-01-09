@@ -32,5 +32,29 @@ describe Oystercard do
       expect{oystercard.deduct(5)}.to change{ oystercard.balance}.by -5
     end
 
+    it 'should have in_use attribute' do
+      expect(oystercard.in_use).to eq(nil)
+    end
+
+    it 'should allow user to touch in' do
+      oystercard.touch_in
+      expect(oystercard.in_use).to eq(true)
+    end
+
+    it 'should allow user to touch out' do
+      oystercard.touch_out
+      expect(oystercard.touch_out).to eq(false)
+    end
+
+    it 'should say if oystercard is in_use' do
+      oystercard.touch_in
+      expect(oystercard).to be_in_journey
+    end
+
+    it 'should say if oystercard is not in_use' do
+      oystercard.touch_in
+      oystercard.touch_out
+      expect(oystercard).not_to be_in_journey
+    end
   end
 end
