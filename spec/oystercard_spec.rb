@@ -4,7 +4,8 @@ describe Oystercard do
   subject :oystercard  { described_class.new }
   let (:entry_station) { double :entry_station, name: 'Barking' }
   let (:exit_station) { double :exit_station, name: 'Reading' }
-  context "balance checks:" do
+
+  describe "assorted checks:" do
     it "check oystercard balance" do
       expect(oystercard.balance).to eq 0
     end
@@ -23,14 +24,8 @@ describe Oystercard do
       expect{oystercard.top_up(amount)}.to raise_error "£#{amount} top up failed, balance will exceed £#{max_balance}"
     end
 
-    it 'should have in_journey? attribute' do
+    it 'should have in_journey?' do
       expect(oystercard.in_journey?).to eq false
-    end
-
-    it 'should allow user to touch in' do
-      oystercard.top_up(1)
-      oystercard.touch_in(entry_station.name)
-      expect(oystercard.in_journey?).to eq(true)
     end
 
     it 'should allow user to touch out' do
@@ -38,71 +33,66 @@ describe Oystercard do
       expect(oystercard.in_journey?).to eq(false)
     end
 
-    it 'should say if oystercard is in_journey?' do
-      oystercard.top_up(1)
-      oystercard.touch_in(entry_station.name)
-      expect(oystercard).to be_in_journey
-    end
-
-    it 'should say if oystercard is not in_journey?' do
-      oystercard.top_up(1)
-      oystercard.touch_in(entry_station.name)
-      oystercard.touch_out(exit_station.name)
-      expect(oystercard).not_to be_in_journey
-    end
-
     it 'should raise an error if a card has less than the minimum balance' do
       expect{oystercard.touch_in(entry_station.name)}.to raise_error "Insufficient funds"
     end
 
-    it 'should deduct £1 from balance when touch out' do
+  end
+
+  describe "top-up" do
+
+    before(:example) do
       oystercard.top_up(1)
+    end
+
+    it 'should deduct £1 from balance when touch out' do
       expect{oystercard.touch_out(exit_station)}.to change{oystercard.balance}.by(-Oystercard::MINIMUM_REQUIREMENT)
     end
 
     it 'should deduct £1 from £2 balance when touch out' do
-      oystercard.top_up(2)
+      oystercard.top_up(1)
       expect{oystercard.touch_out(exit_station)}.to change{oystercard.balance}.by(-Oystercard::MINIMUM_REQUIREMENT)
     end
 
-    it "should remember entry station after touch in" do
+  end
+  describe "top-up, touch in" do
+
+    before(:example) do
       oystercard.top_up(1)
       oystercard.touch_in(entry_station.name)
-      expect(oystercard.entry_station).to eq 'Barking'
+    end
+
+    it "should remember entry station after touch in" do
+      expect(oystercard.journey[:entry]).to eq 'Barking'
+    end
+
+    it 'should say if oystercard is in_journey?' do
+      expect(oystercard).to be_in_journey
+    end
+
+    it 'should allow user to touch in' do
+      expect(oystercard.journey[:entry]).to eq(entry_station.name)
+    end
+
+  end
+
+  describe "top-up, top in, touch out" do
+    before(:example) do
+      oystercard.top_up(1)
+      oystercard.touch_in(entry_station.name)
+      oystercard.touch_out(exit_station.name)
     end
 
     it "should forget entry station after touch out" do
-      oystercard.top_up(1)
-      oystercard.touch_in(entry_station.name)
-      oystercard.touch_out(exit_station.name)
-      expect(oystercard.entry_station).to be nil
-    end
-
-    it 'Checks instance varible' do
-      is_expected.to respond_to(:journeys)
-    end
-
-    it "should remember exit station after touch out" do
-      oystercard.top_up(1)
-      oystercard.touch_in(entry_station.name)
-      oystercard.touch_out(exit_station.name)
-      expect(oystercard.exit_station).to eq 'Reading'
+      expect(oystercard.journey[:entry]).to be nil
     end
 
     it "Should add the completed journey after touch out" do
-      oystercard.top_up(1)
-      oystercard.touch_in(entry_station.name)
-      oystercard.touch_out(exit_station.name)
-      expect(oystercard.journeys.count).to eq 1
-    end
-
-    it "Should add the completed journey after touch out" do
-      oystercard.top_up(1)
-      oystercard.touch_in(entry_station.name)
-      oystercard.touch_out(exit_station.name)
-      p oystercard.journeys
       expect(oystercard.journeys).to include( {entry: entry_station.name, exit: exit_station.name} )
     end
 
+    it 'should say if oystercard is not in_journey?' do
+      expect(oystercard).not_to be_in_journey
+    end
   end
 end
